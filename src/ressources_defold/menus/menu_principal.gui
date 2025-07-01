@@ -1,0 +1,136 @@
+script: "/src/scripts/gui/menu_principal.gui_script"
+fonts {
+  name: "ym"
+  font: "/src/ressources_defold/ym.font"
+}
+textures {
+  name: "gui"
+  texture: "/src/ressources_defold/gui.atlas"
+}
+nodes {
+  size {
+    x: 1024.0
+    y: 576.0
+  }
+  type: TYPE_BOX
+  texture: "gui/decor"
+  id: "decor"
+  pivot: PIVOT_SW
+  adjust_mode: ADJUST_MODE_STRETCH
+  inherit_alpha: true
+  material: "gui_bg"
+}
+nodes {
+  position {
+    x: 512.0
+    y: 410.0
+  }
+  scale {
+    x: 3.0
+    y: 3.0
+  }
+  size {
+    x: 145.0
+    y: 102.0
+  }
+  type: TYPE_BOX
+  texture: "gui/logo"
+  id: "logo"
+  adjust_mode: ADJUST_MODE_STRETCH
+  inherit_alpha: true
+  alpha: 0.0
+}
+nodes {
+  size {
+    x: 200.0
+    y: 100.0
+  }
+  type: TYPE_TEXT
+  text: "Jouer"
+  font: "ym"
+  id: "jouer"
+  adjust_mode: ADJUST_MODE_STRETCH
+  layer: "texte"
+  inherit_alpha: true
+  material: "font"
+}
+nodes {
+  size {
+    x: 200.0
+    y: 100.0
+  }
+  type: TYPE_TEXT
+  text: "Quitter"
+  font: "ym"
+  id: "quitter"
+  adjust_mode: ADJUST_MODE_STRETCH
+  layer: "texte"
+  inherit_alpha: true
+  material: "font"
+}
+nodes {
+  size {
+    x: 200.0
+    y: 100.0
+  }
+  type: TYPE_TEXT
+  text: "Options"
+  font: "ym"
+  id: "options"
+  adjust_mode: ADJUST_MODE_STRETCH
+  layer: "texte"
+  inherit_alpha: true
+  material: "font"
+}
+nodes {
+  size {
+    x: 200.0
+    y: 100.0
+  }
+  type: TYPE_TEXT
+  text: "???"
+  font: "ym"
+  id: "bande_son"
+  adjust_mode: ADJUST_MODE_STRETCH
+  layer: "texte"
+  inherit_alpha: true
+  material: "font"
+}
+nodes {
+  position {
+    x: 512.0
+    y: 144.0
+  }
+  scale {
+    x: 3.0
+    y: 3.0
+  }
+  size {
+    x: 55.0
+    y: 4.0
+  }
+  type: TYPE_BOX
+  texture: "gui/curseur_bas"
+  id: "curseur"
+  adjust_mode: ADJUST_MODE_STRETCH
+  inherit_alpha: true
+  slice9 {
+    x: 3.0
+    z: 3.0
+  }
+}
+layers {
+  name: "texte"
+}
+material: "/builtins/materials/gui.material"
+adjust_reference: ADJUST_REFERENCE_PARENT
+max_nodes: 14
+materials {
+  name: "gui_bg"
+  material: "/src/rendering/materials/gui/background_gui.material"
+}
+materials {
+  name: "font"
+  material: "/src/rendering/materials/font/font.material"
+}
+max_dynamic_textures: 0

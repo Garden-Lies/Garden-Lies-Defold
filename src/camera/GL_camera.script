@@ -1,0 +1,107 @@
+--
+-- GL_camera.script
+-- Garden Lies, 													   21/07/24
+--
+
+--
+-- Implémentation d'une caméra simple pour Garden Lies.
+-- Conforme à la CU no°9 (marcher)
+--
+-- Supporte les fonctionnalités suivantes :
+--
+-- 		* La suivi d'un objet,
+--		 que ce soit en vertical ou horizontal.
+-- 
+-- 		* Des mouvements fluides.
+--
+--		* Un décallage de la caméra
+--		  selon la direction d'une entité.
+--
+
+-- TODO tout mettre en français
+
+local camera = require "src.camera.GL_camera"
+local camera_utils = require "src.camera.camera_utils"
+local go = go
+
+local MSG_RESET_OBJET_SUIVI = hash("reset_objet")
+
+go.property("position", vmath.vector3())
+go.property("objet_suivi", msg.url("."))
+
+--
+-- Si la magnitude est spécifiée,
+-- la caméra essayera d'aller légèrement plus loin d'après la magnitude.
+--
+go.property("magnitude", vmath.vector3())
+
+-- À quelle distance peut-elle s'éloigner.
+go.property("distance_magnitude", 275)
+
+-- Vitesse à laquelle la caméra peut suivre.
+go.property("vitesse_camera", 1.1)
+
+-- TODO bloquer animations
+go.property("animations", true)
+go.property("vitesse_zoom", .1)
+go.property("intensite_camera", .001)
+
+go.property("zoom", .75)
+
+local function calculer_distance_camera(self, dt)
+
+	self.position_cible.x, self.position_cible.y 
+	= go.get_position_obj(self.objet_suivi)
+
+	--
+	-- Calcule la nouvelle position
+	-- en allant plus loin que la direction du joueur.
+	--
+	self.position_cible.x, self.position_cible.y 
+	= camera_utils.calculer_distance_magnitude(
+		self.position_cible, self.magnitude, self.distance_magnitude)
+
+	-- Calibre la position selon la vitesse de l'objet.
+	local delta_x, delta_y 
+	= camera_utils.delta_position(self.position, self.position_cible)
+	self.position_cible.x = self.position_cible.x 
+						  + delta_x * self.vitesse_camera
+	self.position_cible.y = self.position_cible.y 
+						  + delta_y * self.vitesse_camera
+
+	-- Interpolation de la caméra (remplace go.animate)
+	self.position.x, self.position.y
+	= camera_utils.lerping_points(self.position, self.position_cible,
+								  self.intensite_camera,
+								  dt, camera_utils.CIRCULAIRE)
+end
+
+function init(self)
+
+	self.position = go.get_position()
+	self.position_cible = vmath.vector2()
+
+	self.objet = msg.url(".")
+	self.url = msg.url()
+	self.id = go.get_id()
+
+	camera.init(self.id, self.url)
+end
+
+function final(self)
+	camera.final()
+end
+
+function update(self, dt)
+
+	calculer_distance_camera(self, dt)	
+	go.set_position_obj(self.objet, self.position)
+
+	camera.update()
+end
+
+function on_message(self, message_id, message, sender)
+	if message_id == MSG_RESET_OBJET_SUIVI then
+		self.objet_suivi = msg.url(self.objet)
+	end
+end

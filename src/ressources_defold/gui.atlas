@@ -1,0 +1,144 @@
+images {
+  image: "/assets/images/gui/roue/roue.png"
+}
+images {
+  image: "/assets/images/gui/roue/roue_centre.png"
+}
+images {
+  image: "/assets/images/gui/roue/roue_dir.png"
+}
+images {
+  image: "/assets/images/gui/chargement/bord.png"
+}
+images {
+  image: "/assets/images/gui/dlg/ov.png"
+}
+images {
+  image: "/assets/images/gui/curseur/curseur.png"
+}
+images {
+  image: "/assets/images/gui/logo.png"
+}
+images {
+  image: "/assets/images/gui/menu_principal/decor.png"
+}
+images {
+  image: "/assets/images/gui/curseur/curseur_bas.png"
+}
+animations {
+  id: "choix_roue_anim"
+  images {
+    image: "/assets/images/gui/roue/sel/choix1.png"
+  }
+  images {
+    image: "/assets/images/gui/roue/sel/choix2.png"
+  }
+  images {
+    image: "/assets/images/gui/roue/sel/choix3.png"
+  }
+  images {
+    image: "/assets/images/gui/roue/sel/choix4.png"
+  }
+  images {
+    image: "/assets/images/gui/roue/sel/choix5.png"
+  }
+  images {
+    image: "/assets/images/gui/roue/sel/choix6.png"
+  }
+  images {
+    image: "/assets/images/gui/roue/sel/choix7.png"
+  }
+  images {
+    image: "/assets/images/gui/roue/sel/choix8.png"
+  }
+  fps: 15
+}
+animations {
+  id: "progression"
+  images {
+    image: "/assets/images/gui/chargement/progression1.png"
+  }
+  images {
+    image: "/assets/images/gui/chargement/progression2.png"
+  }
+  images {
+    image: "/assets/images/gui/chargement/progression3.png"
+  }
+  images {
+    image: "/assets/images/gui/chargement/progression4.png"
+  }
+  images {
+    image: "/assets/images/gui/chargement/progression5.png"
+  }
+  images {
+    image: "/assets/images/gui/chargement/progression6.png"
+  }
+  images {
+    image: "/assets/images/gui/chargement/progression7.png"
+  }
+  images {
+    image: "/assets/images/gui/chargement/progression8.png"
+  }
+  playback: PLAYBACK_LOOP_FORWARD
+  fps: 5
+}
+animations {
+  id: "examination"
+  images {
+    image: "/assets/images/gui/reaction/examination/examin1.png"
+  }
+  images {
+    image: "/assets/images/gui/reaction/examination/examin2.png"
+  }
+  images {
+    image: "/assets/images/gui/reaction/examination/examin3.png"
+  }
+  images {
+    image: "/assets/images/gui/reaction/examination/examin4.png"
+  }
+  images {
+    image: "/assets/images/gui/reaction/examination/examin5.png"
+  }
+  images {
+    image: "/assets/images/gui/reaction/examination/examin6.png"
+  }
+  images {
+    image: "/assets/images/gui/reaction/examination/examin7.png"
+  }
+  images {
+    image: "/assets/images/gui/reaction/examination/examin8.png"
+  }
+  playback: PLAYBACK_LOOP_FORWARD
+  fps: 15
+}
+animations {
+  id: "parler"
+  images {
+    image: "/assets/images/gui/reaction/parler/parler1.png"
+  }
+  images {
+    image: "/assets/images/gui/reaction/parler/parler2.png"
+  }
+  images {
+    image: "/assets/images/gui/reaction/parler/parler3.png"
+  }
+  images {
+    image: "/assets/images/gui/reaction/parler/parler4.png"
+  }
+  playback: PLAYBACK_LOOP_FORWARD
+  fps: 15
+}
+animations {
+  id: "action"
+  images {
+    image: "/assets/images/gui/reaction/action/action1.png"
+  }
+  images {
+    image: "/assets/images/gui/reaction/action/action2.png"
+  }
+  images {
+    image: "/assets/images/gui/reaction/action/action3.png"
+  }
+  fps: 15
+}
+extrude_borders: 1

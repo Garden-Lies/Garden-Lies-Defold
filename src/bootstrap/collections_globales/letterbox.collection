@@ -1,0 +1,10 @@
+name: "letterbox"
+scale_along_z: 0
+embedded_instances {
+  id: "letterbox"
+  data: "components {\n"
+  "  id: \"letterbox\"\n"
+  "  component: \"/src/ressources_defold/menus/letterbox.gui\"\n"
+  "}\n"
+  ""
+}

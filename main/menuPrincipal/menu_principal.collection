@@ -1,0 +1,31 @@
+name: "menuPrincipal"
+instances {
+  id: "sfx_curseur"
+  prototype: "/src/objets/sons/banques_sons/sfx_curseur.go"
+}
+instances {
+  id: "organisateur_musiques"
+  prototype: "/src/objets/sons/organisateur_musiques.go"
+}
+scale_along_z: 0
+embedded_instances {
+  id: "menuPrincipal"
+  children: "organisateur_musiques"
+  children: "sfx_curseur"
+  data: "components {\n"
+  "  id: \"controleur_menu_principal\"\n"
+  "  component: \"/main/menuPrincipal/controleur_menu_principal.script\"\n"
+  "}\n"
+  "components {\n"
+  "  id: \"menu_principal\"\n"
+  "  component: \"/src/ressources_defold/menus/menu_principal.gui\"\n"
+  "}\n"
+  "embedded_components {\n"
+  "  id: \"musique\"\n"
+  "  type: \"sound\"\n"
+  "  data: \"sound: \\\"/assets/ressources_defaut/no_sound.wav\\\"\\n"
+  "looping: 1\\n"
+  "\"\n"
+  "}\n"
+  ""
+}

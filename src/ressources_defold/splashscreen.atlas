@@ -1,0 +1,7 @@
+images {
+  image: "/assets/images/splash.png"
+}
+images {
+  image: "/assets/images/defold.png"
+}
+extrude_borders: 2

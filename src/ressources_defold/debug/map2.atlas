@@ -1,0 +1,4 @@
+images {
+  image: "/assets/images/maps/TiledMap Editor Example Demo- Ancient Ruins.png"
+}
+extrude_borders: 2

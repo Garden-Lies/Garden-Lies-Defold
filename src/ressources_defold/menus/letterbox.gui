@@ -1,0 +1,58 @@
+script: "/src/scripts/gui/letterbox.gui_script"
+nodes {
+  size {
+    x: 200.0
+    y: 100.0
+  }
+  type: TYPE_BOX
+  id: "letterbox"
+  adjust_mode: ADJUST_MODE_STRETCH
+  inherit_alpha: true
+  alpha: 0.0
+  size_mode: SIZE_MODE_AUTO
+  enabled: false
+  visible: false
+}
+nodes {
+  size {
+    x: 1024.0
+    y: 75.0
+  }
+  color {
+    x: 0.0
+    y: 0.0
+    z: 0.102
+  }
+  type: TYPE_BOX
+  id: "partie_haute"
+  pivot: PIVOT_SW
+  adjust_mode: ADJUST_MODE_STRETCH
+  parent: "letterbox"
+  inherit_alpha: true
+  size_mode: SIZE_MODE_AUTO
+}
+nodes {
+  position {
+    y: 576.0
+  }
+  size {
+    x: 1024.0
+    y: 75.0
+  }
+  color {
+    x: 0.0
+    y: 0.0
+    z: 0.102
+  }
+  type: TYPE_BOX
+  id: "partie_basse"
+  pivot: PIVOT_NW
+  adjust_mode: ADJUST_MODE_STRETCH
+  parent: "letterbox"
+  inherit_alpha: true
+  size_mode: SIZE_MODE_AUTO
+}
+material: "/src/rendering/materials/gui/front_gui.material"
+adjust_reference: ADJUST_REFERENCE_PARENT
+max_nodes: 3
+max_dynamic_textures: 0

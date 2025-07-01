@@ -1,0 +1,129 @@
+--
+-- menu_principal.gui_script
+-- Garden Lies, 													   18/09/24
+--
+
+-- 
+-- Affiche les éléments du menu principal.
+-- Requiert dialogue.gui pour fonctionner.
+--
+
+local actions  = require "src.modules.input.constantes_action_id"
+local texte = require "src.modules.gui.texte"
+local curseur = require "src.modules.input.curseur"
+local dialogue = require "src.modules.gui.dialogue"
+local gui_utils = require "src.modules.utils.gui"
+local vector2 = require "src.modules.utils.vector".vector2
+
+local MSG_AFF_MENU_PRINCIPAL = hash("afficher_menu_principal")
+
+local CONTROLEUR = "#controleur_menu_principal"
+
+local MARGE_CURSEUR = vector2(0, 25)
+
+local function curseur_to_position(self)
+
+	local element_curseur = self.curseur:get_element_at_offset()[1]
+	
+	local position_curseur = gui.get_position(element_curseur) * 3
+		+ gui.get_position(self.dlg_racine) - MARGE_CURSEUR
+
+		gui.animate(self.curseur_sprt, "size.x",
+					texte.get_taille_pixels(element_curseur) + 10,
+					gui.EASING_OUTEXPO, .5)	
+		
+	gui.set_position(self.curseur_sprt, position_curseur)
+end
+
+local function afficher_menu_principal(self)
+	
+	-- Place le logo à la moitié de l'écran.
+	local pos_origine_logo = gui.get_position(self.logo)
+	gui.set(self.logo, gui_utils.PROP_POSITION_X,
+			sys.get_config_int("display.width") / 2)
+	gui.set(self.logo, gui_utils.PROP_POSITION_Y,
+			sys.get_config_int("display.height") / 3)
+
+	-- Aggrandit le logo après coup.
+	local scl_origine_logo = gui.get_scale(self.logo)
+	gui.set_scale(self.logo, vmath.mul_per_elem(scl_origine_logo,
+												vector2(.7, .7)))
+
+	-- Animation du logo, puis apparition de la boîte de dialogue.
+	gui.animate(self.logo, gui.PROP_SCALE, scl_origine_logo,
+				gui.EASING_INOUTBACK, 4)
+	gui.animate(self.logo, gui_utils.PROP_ALPHA, 1, gui.EASING_LINEAR, 3)
+	gui.animate(self.logo, gui.PROP_POSITION,
+				pos_origine_logo, gui.EASING_INOUTBACK, 3.5, .5)
+
+end
+
+function init(self)
+	
+	self.logo = gui.get_node(hash("logo"))
+
+	-- Construction des labels où le curseur pointera.
+	local n = texte.creer_noeud_texte(vector2(10, 10),
+									 "Garden Lies, 0.0.1rc1")
+
+	gui.set_scale(n, vector2(1.5, 1.5))
+	gui.set_color(n, vmath.vector3(0, .3, 8))
+	
+	-- Curseur
+	self.curseur_sprt = gui.get_node("curseur")
+	self.curseur = curseur.new({grille_x = 2, grille_y = 2, inversion = false})
+	self.curseur:set_element(1, 2, {gui.get_node("jouer"), "jouer"})
+	self.curseur:set_element(1, 1, {gui.get_node("options"), "options"})
+	self.curseur:set_element(2, 1, {gui.get_node("quitter"), "quitter"})
+	self.curseur:set_element(2, 2, {gui.get_node("bande_son"), "bande_son"})
+
+	-- Nouveau dlg (test)
+	self.dlg = dialogue.new(3)
+	self.dlg_racine = self.dlg:get_racine()
+	self.dlg_cadre = self.dlg:get_cadre()
+
+	self.dlg:set_cadre_texture("gui", "ov", vmath.vector4(11,11,11,11))
+
+	gui.set_enabled(self.dlg_racine, true)
+	
+	gui.set_parent(gui.get_node("curseur"),self.dlg_racine)
+	gui.set_parent(gui.get_node("jouer"),self.dlg_racine)
+	gui.set_parent(gui.get_node("options"),self.dlg_racine)
+	gui.set_parent(gui.get_node("quitter"),self.dlg_racine)
+	gui.set_parent(gui.get_node("bande_son"),self.dlg_racine)
+
+	self.dlg:set_placement("GAUCHE", 0, 3, 
+	function() 
+		self.dlg:set_placement("CENTRE_REDUIT", 2, 5)
+		local pos = self.dlg:get_limites_cadre(45, 25)
+		gui.set_position(gui.get_node("jouer"), vector2(pos.w, pos.x))
+		gui.set_position(gui.get_node("options"), vector2(pos.w, pos.z))
+		gui.set_position(gui.get_node("quitter"), vector2(pos.y, pos.z))
+		gui.set_position(gui.get_node("bande_son"), vector2(pos.y, pos.x))
+	end)
+	
+	local pos = self.dlg:get_limites_cadre(50, 28)
+	gui.set_position(gui.get_node("jouer"), vector2(pos.w, pos.x))
+	gui.set_position(gui.get_node("options"), vector2(pos.w, pos.z))
+	gui.set_position(gui.get_node("quitter"), vector2(pos.y, pos.z))
+	gui.set_position(gui.get_node("bande_son"), vector2(pos.y, pos.x))
+
+	gui.move_above(self.curseur_sprt, self.dlg_racine)
+end
+
+function on_input(self, action_id, action)
+	if self.curseur:update_curseur_input(action_id, action) then
+		curseur_to_position(self)
+		sound.play("sfx_curseur#selection2")
+	elseif action_id == actions.CONFIRMER and action.released then
+		sound.play("sfx_curseur#confirmer")
+		msg.post(CONTROLEUR, self.curseur:get_element_at_offset()[2])
+	end
+end
+
+function on_message(self, message_id, message)
+	
+	if message_id == MSG_AFF_MENU_PRINCIPAL then
+		afficher_menu_principal(self)
+	end
+end

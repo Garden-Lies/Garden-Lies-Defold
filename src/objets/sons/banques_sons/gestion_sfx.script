@@ -1,0 +1,14 @@
+--
+-- gestion_sfx.render_script
+-- Garden Lies, 													   09/11/24
+--
+
+-- 
+-- Offre quelques opérations en plus de celles de sound.
+--
+
+-- TODO son gated : https://defold.com/manuals/sound
+
+function init(self)
+	
+end

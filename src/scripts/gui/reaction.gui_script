@@ -1,0 +1,82 @@
+--
+-- reaction.gui_script
+-- Garden Lies, 													   05/08/24
+--
+
+--
+-- Affiche une bulle indiquant une possible action à l'utilisateur.
+-- Complète une partie de la CU no°11 (Interagir)
+--
+
+local gui_utils = require "src.modules.utils.gui"
+
+local MSG_ACTIVER_REACTION= hash("activer_reaction")
+local MSG_DESACTIVER_REACTION= hash("desactiver_reaction")
+local MSG_SET_REACTION = hash("set_reaction")
+local MSG_UPDATE_POSITION = hash("update_position")
+
+local BASE_VECT_SCALE = vmath.vector3(1.3, 1.3, 1)
+local APP_VECT_SCALE = vmath.vector3(1.8, 1.8, 1)
+
+local function activer_bulle(self)
+	
+	local noeud = self.noeuds[self.bulle_sel]
+	gui.set_alpha(noeud, 0)
+	gui.set_scale(noeud, BASE_VECT_SCALE)
+	
+	gui.set_enabled(noeud, true)
+
+	gui.animate(noeud, gui.PROP_SCALE, APP_VECT_SCALE, gui.EASING_INCUBIC,
+				.3, 0, nil, gui.PLAYBACK_ONCE_PINGPONG)
+	
+	gui.animate(noeud, gui.PROP_ALPHA, 1, gui.EASING_LINEAR, .2, 0,
+				function() gui.play_flipbook(noeud, self.bulle_sel) end)
+end
+
+local function desactiver_bulle(self)
+
+	local noeud = self.noeuds[self.bulle_sel]
+	
+	gui.animate(noeud, gui.PROP_ALPHA, 0,
+				gui.EASING_LINEAR, .1, 0,
+				function() 
+					gui.set_enabled(self.noeuds[self.bulle_sel], false) 
+				end)
+end
+
+local function set_reaction(self, reaction)
+	self.bulle_sel = reaction
+end
+
+local function update_position(self, x, y)
+	gui.set(self.racine, gui_utils.PROP_POSITION_X, x)
+	gui.set(self.racine, gui_utils.PROP_POSITION_Y, y)
+end
+
+function init(self)
+
+	local racine = gui.get_node("racine")
+	self.noeuds = gui.get_tree(racine)
+	self.racine = racine
+
+	-- Bulle d'action par défaut (permet d'éviter des erreurs.)
+	self.bulle_sel = "action"
+end
+
+function on_message(self, message_id, message)
+	
+	--
+	-- La position doit se mettre à jour constamment
+	-- si le joueur se déplace.
+	--
+	if message_id == MSG_UPDATE_POSITION then
+		update_position(self, message.x, message.y)
+		
+	elseif message_id == MSG_ACTIVER_REACTION then
+		activer_bulle(self)
+	elseif message_id == MSG_DESACTIVER_REACTION then
+		desactiver_bulle(self)
+	elseif message_id == MSG_SET_REACTION then
+		set_reaction(self, message.reaction)
+	end
+end

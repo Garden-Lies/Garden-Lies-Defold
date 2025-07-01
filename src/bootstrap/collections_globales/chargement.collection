@@ -1,0 +1,10 @@
+name: "chargement"
+scale_along_z: 0
+embedded_instances {
+  id: "chargement"
+  data: "components {\n"
+  "  id: \"chargement\"\n"
+  "  component: \"/src/ressources_defold/menus/chargement.gui\"\n"
+  "}\n"
+  ""
+}

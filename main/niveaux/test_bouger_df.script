@@ -1,0 +1,5 @@
+function update(self, dt)
+	local a = go.get_position()
+	a.x = a.x - 30 * dt
+	go.set_position(a)
+end

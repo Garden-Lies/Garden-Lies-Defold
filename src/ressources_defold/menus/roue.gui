@@ -1,0 +1,198 @@
+script: "/src/scripts/gui/roue.gui_script"
+textures {
+  name: "gui"
+  texture: "/src/ressources_defold/gui.atlas"
+}
+nodes {
+  type: TYPE_BOX
+  id: "racine"
+  inherit_alpha: true
+  size_mode: SIZE_MODE_AUTO
+  enabled: false
+  visible: false
+}
+nodes {
+  size {
+    x: 34.0
+    y: 27.0
+  }
+  type: TYPE_BOX
+  id: "sel_haut"
+  parent: "racine"
+  layer: "roue_sel"
+  inherit_alpha: true
+  visible: false
+}
+nodes {
+  position {
+    y: 38.0
+  }
+  rotation {
+    z: -180.0
+  }
+  scale {
+    x: 1.3
+    y: 1.3
+  }
+  type: TYPE_BOX
+  texture: "gui/roue_dir"
+  id: "roue_haut"
+  parent: "sel_haut"
+  layer: "roue_sel"
+  inherit_alpha: true
+  size_mode: SIZE_MODE_AUTO
+  enabled: false
+}
+nodes {
+  position {
+    x: 5.0
+  }
+  size {
+    x: 34.0
+    y: 27.0
+  }
+  type: TYPE_BOX
+  id: "sel_centre"
+  parent: "racine"
+  layer: "roue_sel"
+  inherit_alpha: true
+  visible: false
+}
+nodes {
+  position {
+    x: -5.0
+  }
+  scale {
+    x: 1.3
+    y: 1.3
+  }
+  type: TYPE_BOX
+  texture: "gui/roue_centre"
+  id: "roue_centre"
+  parent: "sel_centre"
+  layer: "roue_sel"
+  inherit_alpha: true
+  size_mode: SIZE_MODE_AUTO
+  enabled: false
+}
+nodes {
+  size {
+    x: 34.0
+    y: 27.0
+  }
+  type: TYPE_BOX
+  id: "sel_bas"
+  parent: "racine"
+  layer: "roue_sel"
+  inherit_alpha: true
+  visible: false
+}
+nodes {
+  position {
+    y: -38.3
+  }
+  scale {
+    x: 1.3
+    y: 1.3
+  }
+  type: TYPE_BOX
+  texture: "gui/roue_dir"
+  id: "roue_bas"
+  parent: "sel_bas"
+  layer: "roue_sel"
+  inherit_alpha: true
+  size_mode: SIZE_MODE_AUTO
+  enabled: false
+}
+nodes {
+  position {
+    x: 29.5
+  }
+  size {
+    x: 34.0
+    y: 27.0
+  }
+  type: TYPE_BOX
+  id: "sel_droite"
+  parent: "racine"
+  layer: "roue_sel"
+  inherit_alpha: true
+  visible: false
+}
+nodes {
+  position {
+    x: 8.8
+  }
+  rotation {
+    z: 90.0
+  }
+  scale {
+    x: 1.3
+    y: 1.3
+  }
+  type: TYPE_BOX
+  texture: "gui/roue_dir"
+  id: "roue_droite"
+  parent: "sel_droite"
+  layer: "roue_sel"
+  inherit_alpha: true
+  size_mode: SIZE_MODE_AUTO
+  enabled: false
+}
+nodes {
+  position {
+    x: -29.5
+  }
+  size {
+    x: 34.0
+    y: 27.0
+  }
+  type: TYPE_BOX
+  id: "sel_gauche"
+  parent: "racine"
+  layer: "roue_sel"
+  inherit_alpha: true
+  visible: false
+}
+nodes {
+  position {
+    x: -8.8
+  }
+  rotation {
+    z: -90.0
+  }
+  scale {
+    x: 1.3
+    y: 1.3
+  }
+  type: TYPE_BOX
+  texture: "gui/roue_dir"
+  id: "roue_gauche"
+  parent: "sel_gauche"
+  layer: "roue_sel"
+  inherit_alpha: true
+  size_mode: SIZE_MODE_AUTO
+  enabled: false
+}
+nodes {
+  scale {
+    x: 1.3
+    y: 1.3
+  }
+  type: TYPE_BOX
+  texture: "gui/roue"
+  id: "roue"
+  parent: "racine"
+  inherit_alpha: true
+  size_mode: SIZE_MODE_AUTO
+}
+layers {
+  name: "plantes"
+}
+layers {
+  name: "roue_sel"
+}
+material: "/src/rendering/materials/gui/detached_gui.material"
+adjust_reference: ADJUST_REFERENCE_DISABLED
+max_nodes: 12
+max_dynamic_textures: 0

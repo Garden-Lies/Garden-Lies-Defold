@@ -1,0 +1,58 @@
+--
+-- menu_principal_controleur.script
+-- Garden Lies, 													   08/09/24
+--
+
+--
+-- Controleur du menu principal.
+--
+
+local pool = require "src.modules.global".pool
+local chemins = require "src.modules.fichier.chemins"
+local msg_utils = require "src.modules.utils.msg"
+local sys_utils = require "src.modules.utils.sys"
+local res_utils = require "src.modules.fichier.gestionnaire_ressources"
+
+-- test
+local global = require "src.modules.global"
+local batch = require "src.modules.traitement_lot.fichiers_batch"
+
+--
+-- TODO enclencher le splashscreen lors du premier lancement,
+-- ou bien, lorsque cela est demandé par le joueur.
+--
+local function afficher_splashscreen()
+
+end
+
+--
+-- S'affiche après le splashscreen,
+-- ou si le joueur revient sur cet écran.
+--
+local function afficher_accueil()
+
+	msg.post("#menu_principal", "afficher_menu_principal")
+	-- TODO les mettre dans le script
+end
+
+function init(self)
+	
+	-- TODO init
+	-- TODO à changer
+	
+	local brise = pool:charger_ressource(chemins.get_musique("brise.ogg"))
+	res_utils.set_ressource_audio("/organisateur_musiques#canal1", brise)
+	sound.play("/organisateur_musiques#canal1")
+
+	-- msg.post(global.url_menu_chargement, "activer_ecran")
+	
+	afficher_accueil()
+	msg.post("#menu_principal", msg_utils.ACQUIRE_INPUT)
+end
+
+function on_message(self, message_id, message)
+
+	if message_id == hash("quitter") then
+		sys_utils.exit_with_msg(1)
+	end
+end

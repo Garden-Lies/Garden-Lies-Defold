@@ -1,0 +1,136 @@
+key_trigger {
+  input: KEY_SPACE
+  action: "confirmer"
+}
+key_trigger {
+  input: KEY_W
+  action: "confirmer"
+}
+key_trigger {
+  input: KEY_ENTER
+  action: "confirmer"
+}
+key_trigger {
+  input: KEY_RSHIFT
+  action: "sprint"
+}
+key_trigger {
+  input: KEY_LSHIFT
+  action: "sprint"
+}
+key_trigger {
+  input: KEY_X
+  action: "retour"
+}
+key_trigger {
+  input: KEY_ESC
+  action: "retour"
+}
+key_trigger {
+  input: KEY_BACKSPACE
+  action: "retour"
+}
+key_trigger {
+  input: KEY_TAB
+  action: "carte"
+}
+key_trigger {
+  input: KEY_N
+  action: "carte"
+}
+key_trigger {
+  input: KEY_C
+  action: "inventaire"
+}
+key_trigger {
+  input: KEY_E
+  action: "inventaire"
+}
+key_trigger {
+  input: KEY_F12
+  action: "options"
+}
+key_trigger {
+  input: KEY_UP
+  action: "haut"
+}
+key_trigger {
+  input: KEY_RIGHT
+  action: "droite"
+}
+key_trigger {
+  input: KEY_DOWN
+  action: "bas"
+}
+key_trigger {
+  input: KEY_LEFT
+  action: "gauche"
+}
+key_trigger {
+  input: KEY_Q
+  action: "roue"
+}
+gamepad_trigger {
+  input: GAMEPAD_LSTICK_LEFT
+  action: "gauche"
+}
+gamepad_trigger {
+  input: GAMEPAD_LSTICK_RIGHT
+  action: "droite"
+}
+gamepad_trigger {
+  input: GAMEPAD_LSTICK_DOWN
+  action: "bas"
+}
+gamepad_trigger {
+  input: GAMEPAD_LSTICK_UP
+  action: "haut"
+}
+gamepad_trigger {
+  input: GAMEPAD_LSHOULDER
+  action: "options"
+}
+gamepad_trigger {
+  input: GAMEPAD_LPAD_LEFT
+  action: "gauche"
+}
+gamepad_trigger {
+  input: GAMEPAD_LPAD_RIGHT
+  action: "droite"
+}
+gamepad_trigger {
+  input: GAMEPAD_LPAD_DOWN
+  action: "bas"
+}
+gamepad_trigger {
+  input: GAMEPAD_LPAD_UP
+  action: "haut"
+}
+gamepad_trigger {
+  input: GAMEPAD_RSHOULDER
+  action: "sprint"
+}
+gamepad_trigger {
+  input: GAMEPAD_RPAD_RIGHT
+  action: "confirmer"
+}
+gamepad_trigger {
+  input: GAMEPAD_RPAD_DOWN
+  action: "retour"
+}
+gamepad_trigger {
+  input: GAMEPAD_START
+  action: "inventaire"
+}
+gamepad_trigger {
+  input: GAMEPAD_BACK
+  action: "carte"
+}
+gamepad_trigger {
+  input: GAMEPAD_RPAD_LEFT
+  action: "sprint"
+}
+gamepad_trigger {
+  input: GAMEPAD_RPAD_UP
+  action: "roue"
+}

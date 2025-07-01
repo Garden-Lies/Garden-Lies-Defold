@@ -1,0 +1,299 @@
+--
+-- GL_render.render_script
+-- Garden Lies, 													   21/07/24
+--
+-- Réecriture du système de rendu des caméras le 09/08/24
+-- Support des shaders globaux le 15/08/24
+--
+
+--
+-- Système de rendu de Garden Lies.
+-- Peut manipuler les textures, la caméra, la fenêtre
+-- ainsi que les shaders.
+--
+-- Constantes shaders :
+-- resolution - taille de la fenêtre.
+-- time - temps écoulé depuis le lancement.
+--
+
+-- TODO réecrire le render en C pour gagner en performance.
+
+local camera = require "src.camera.GL_camera"
+
+local MSG_SET_MATERIAL_FONT = hash("set_material_font")
+local MSG_SET_MATERIAL_GUI = hash("set_material_gui")
+local MSG_SET_MATERIAL_SPRITE = hash("set_material_sprite")
+
+-- 
+-- Active les matériels autorisés d'une table.
+--
+local function activer_materiels(liste_post_process)
+	for i, v in pairs(liste_post_process) do
+		if v then
+			render.enable_material(i)
+		end
+	end
+end
+
+local function clear_render(self)
+	render.set_depth_mask(true)
+	render.clear(self.clear_buffers)
+	render.enable_state(graphics.STATE_BLEND)
+end
+
+-- 
+-- Désactive les matériels d'une table.
+--
+local function desactiver_materiels(liste_post_process)
+	for i, v in pairs(liste_post_process) do
+		render.disable_material(i)
+	end
+end
+
+local function setup_camera(self)
+
+	--
+	-- Utilisé pour le culling des objets.
+	-- https://defold.com/ref/alpha/render/#render.draw:predicate
+	--
+	
+	self.gui_draw_options = {
+		frustum = vmath.matrix4_orthographic(0, render.get_window_width(),
+											 0, render.get_window_height(),
+											-1, 1)
+	}
+
+	self.camera_draw_options = {
+		frustum = vmath.matrix4()
+	}
+
+	-- Instance de la caméra
+	self.camera = camera.camera
+end
+
+local function setup_constantes(self)
+	
+	self.constantes = render.constant_buffer()
+	self.constantes.time = vmath.vector4(0)
+	
+	self.constantes.resolution 
+	= vmath.vector4(render.get_window_width(),
+					render.get_window_height(), 0, 0)
+
+	self.camera_draw_options.constants = self.constantes
+	self.gui_draw_options.constants = self.constantes
+end
+
+local function setup_fenetre(self)
+	
+	if sys.get_config_int("garden_lies.maximize_button") == 0 then
+		defos.disable_maximize_button()
+	end
+
+	if sys.get_config_int("garden_lies.window_resize") == 0 then
+		defos.disable_window_resize()
+	end
+end
+
+local function setup_material(self)
+
+	-- Pour le post process. Défini ce qui est actif ou pas.
+	
+	self.post_process_material_sprite = {
+		[hash("nss_sprite")] = true
+	}
+
+	self.post_process_material_gui = {
+		[hash("nss_gui")] = true 
+	}
+
+	self.post_process_material_font = {
+		[hash("nss_font")] = true
+	}
+
+	-- TODO post process global
+	
+end
+
+local function setup_render(self)
+
+	-- Prédicats
+	self.tile_pred = render.predicate({hash("tile")})
+	self.gui_pred = render.predicate({hash("gui")})
+	self.background_gui_pred = render.predicate({hash("background_gui")})
+	self.front_gui_pred = render.predicate({hash("front_gui")})
+	self.detached_gui_pred = render.predicate({hash("detached_gui")})
+	self.font_pred = render.predicate({hash("font")})
+	self.front_font_pred = render.predicate({hash("front_font")})
+	self.particle_pred = render.predicate({hash("particle")})
+
+	-- Couleurs du fond de l'écran
+	local clear_color = vmath.vector4()
+	clear_color.x = sys.get_config("render.clear_color_red", 0)
+	clear_color.y = sys.get_config("render.clear_color_green", 0)
+	clear_color.z = sys.get_config("render.clear_color_blue", 0)
+	clear_color.w = sys.get_config("render.clear_color_alpha", 0)
+	self.clear_buffers = {[graphics.BUFFER_TYPE_COLOR0_BIT] = clear_color,
+						  [graphics.BUFFER_TYPE_DEPTH_BIT] = 1,
+						  [graphics.BUFFER_TYPE_STENCIL_BIT] = 0}
+end
+
+-- Met à jour la seule caméra.
+local function update_camera_vue(self)
+	
+	local viewport = self.camera.viewport_pixel
+	render.set_viewport(viewport.x, viewport.y, viewport.z, viewport.w)
+
+	local view, proj = self.camera.view, self.camera.projection
+	render.set_view(view)
+	render.set_projection(proj)
+
+	self.camera_draw_options.frustum = proj * view
+	
+end
+
+local function update_constantes(self, dt)
+	self.constantes.time = vmath.vector4(self.constantes.time.x + dt, 0, 0, 0)
+end
+
+
+--
+-- Affiche les éléments GUIs toujours
+-- affichés AVANT les autres. 
+--
+-- Exemple : fond d'écran
+--
+local function update_back_gui(self)
+	render.draw(self.background_gui_pred, self.gui_draw_options)
+end
+
+--
+-- Affiche les éléments GUIs classiques.
+--
+local function update_middle_gui(self)
+	
+	render.draw(self.gui_pred, self.gui_draw_options)
+	
+	activer_materiels(self.post_process_material_font)
+	render.draw(self.font_pred, self.gui_draw_options)
+	desactiver_materiels(self.post_process_material_font)
+end
+
+--
+-- Affiche les éléments GUIs toujours
+-- affichés APRES les autres. 
+--
+-- Exemple : menu superposé aux autres.
+--
+local function update_front_gui(self)
+
+	render.draw(self.front_gui_pred, self.gui_draw_options)
+	
+	activer_materiels(self.post_process_material_font)
+	render.draw(self.front_font_pred, self.gui_draw_options)
+	desactiver_materiels(self.post_process_material_font)
+end
+
+--
+-- Met à jour les menus et le texte (gui.)
+-- Ils ne sont pas affectés à des shaders.
+--
+local function update_gui(self)
+
+	activer_materiels(self.post_process_material_gui)
+	
+	--
+	-- GUI non dépendant de l'écran.
+	-- github.com/britzl/publicexamples/tree/master/examples/gui_follows_go
+	--
+	render.draw(self.detached_gui_pred, self.camera_draw_options)
+	
+	-- Enlève les ajustements d'ordre z.
+	render.set_depth_mask(false)
+
+	-- Vue et projection d'après l'entiéreté de l'écran.
+	render.set_projection(self.camera.projection_gui)
+
+	-- L'ordre est important
+	update_back_gui(self)
+	update_middle_gui(self)
+	update_front_gui(self)
+
+	desactiver_materiels(self.post_process_material_gui)
+end
+
+--
+-- Met à jour les textures, généralement de prédicats "sprite"
+--
+local function update_textures(self)
+
+	activer_materiels(self.post_process_material_sprite)
+	
+	render.draw(self.tile_pred, self.camera_draw_options)
+	render.draw(self.particle_pred, self.camera_draw_options)
+
+	desactiver_materiels(self.post_process_material_sprite)
+end
+
+local function window_callback(self, event)
+
+	--
+	-- Informe à la caméra le changement de la taille de la vue
+	-- si elle change.
+	--
+	if event == window.WINDOW_EVENT_RESIZED then 
+		
+		camera.update_window()
+
+		self.constantes.resolution 
+		= vmath.vector4(render.get_window_width(),
+						render.get_window_height(), 0, 0)
+
+	end
+end
+
+function init(self)
+
+	setup_fenetre(self)
+	setup_render(self)
+	setup_material(self)
+	setup_camera(self)
+	setup_constantes(self)
+	
+	-- window prend du temps à se charger visiblement.
+	timer.delay(.001, false, function() 
+								camera.update_window()
+								window.set_listener(window_callback) 
+							end)
+end
+
+--
+-- Raffraîchit à chaque trame la fenêtre et met à jour
+-- la caméra, les textures ainsi que les shaders.
+--
+-- Si la caméra n'a pas encore été instanciée, alors seulement
+-- le GUI fonctionnera.
+--
+function update(self, dt)
+
+	clear_render(self)
+	update_constantes(self, dt)
+	
+	update_camera_vue(self)
+	
+	update_textures(self)
+	update_gui(self)
+	
+end
+
+-- TODO Méthodes pour changer l'état de la fenêtre.
+function on_message(self, message_id, message)
+
+	if message_id == MSG_SET_MATERIAL_FONT then
+		self.post_process_material_font[message.material] = message.est_actif
+	elseif message_id == MSG_SET_MATERIAL_GUI then
+		self.post_process_material_gui[message.material] = message.est_actif
+	elseif message_id == MSG_SET_MATERIAL_SPRITE then
+		self.post_process_material_sprite[message.material] = message.est_actif
+	end
+end

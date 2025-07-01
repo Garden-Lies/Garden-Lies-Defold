@@ -1,0 +1,126 @@
+--
+-- bootstrap.script
+-- Garden Lies, 													   03/07/24
+--
+-- Réecrit pour être plus utilisable avec des 
+-- options supplémentaires le 08/09/24
+--
+
+--
+-- Procède à l'amorçage du jeu en lisant et en configurant 
+-- les paramètres de base :
+--
+-- * La configuration globale crée par l'utilisateur 
+-- (ou celle par défaut si non existante.)
+--
+-- Le programme lance ensuite le menu principal.
+--
+
+local global = require "src.modules.global"
+local batch_c = require "src.modules.traitement_lot.collections_batch"
+local cproxy_msg = require "src.modules.collections.cproxy_msg"
+
+-- ===================== Constantes  =====================
+
+local DECO_BOOTSTRAP 
+= "========================= Bootstrap ========================="
+
+local ID_DISCORD = "1301266483762036736"
+
+local CFACTORY_CHARGEMENT = "#cfchargement"
+local CFACTORY_LETTERBOX = "#cfletterbox"
+
+local MENU_PRINCIPAL = "#menu_principal"
+
+-- ===================== Système de chargement =====================
+
+local function afficher_debug_start()
+	
+	print("Garden Lies, " .. sys.get_config_string("project.version"))
+	print("Lancé actuellement sur " .. sys.get_sys_info().system_name)
+	
+	-- Bloque le rendu en release.
+	if sys.get_config_int("garden_lies.debug_info") == 1 then
+		profiler.enable_ui(true)
+		profiler.set_ui_view_mode(profiler.VIEW_MODE_MINIMIZED)
+	end
+end
+
+local function charger_assets()
+
+	-- Factories globales
+	local cfactories = {
+		
+		{url_cfactory = CFACTORY_CHARGEMENT,
+		action_cfactory = 
+		function(url) 
+			local obj = collectionfactory.create(url)
+			global.url_menu_chargement = msg.url(obj[hash("/chargement")])
+			msg.post(global.url_menu_chargement, "activer_ecran")
+		end},
+		
+		{url_cfactory = CFACTORY_LETTERBOX}
+	}
+
+	batch_c.charger_collections_factory(cfactories)
+
+end
+
+-- TODO le séparer dans un autre script
+local function init_prc(id)
+	
+	if discordrich and sys.get_config_int("discordrich.rpc") == 1 then
+		
+		discordrich.initialize(id)
+
+		discordrich.update_presence({
+			state = "Visite l'Annexe Fleurie (✿◠‿◠)",
+			details = "Quel endroit mystérieux...",
+			start_timestamp = os.time()
+		})
+
+		print("RPC de l'application ", id, " initialisée")
+	else
+		print("Le RPC pour l'application ", id, " n'a pas été lancée")
+	end
+end
+
+local function set_param_perf()
+
+	local gb_freq = sys.get_config_int("performance.garbagec_frequency")
+	local gb_scale = sys.get_config_int("performance.garbagec_clean_scale")
+	print("Ramasse-miettes : environ " 
+	   .. gb_freq * .002 .. "mo de cache")
+
+	-- Rend le ramasse-miettes moins aggressif.
+	collectgarbage("setpause", gb_freq)
+	collectgarbage("setstepmul", gb_scale)
+end
+
+-- Effectue la préparation complète du jeu.
+function init(self)
+
+	self.cproxy_msg = cproxy_msg.new()
+	
+	self.cproxy_msg:charger_async(MENU_PRINCIPAL)
+	
+	print()
+	print(DECO_BOOTSTRAP)
+
+	--#IF DEBUG
+	afficher_debug_start()
+	--#ENDIF
+
+	charger_assets()
+
+	set_param_perf()
+
+	init_prc(ID_DISCORD)
+
+	print(DECO_BOOTSTRAP)
+	print()
+end
+
+function on_message(self, message_id, message, sender)
+	self.cproxy_msg:on_message(message_id, message, sender)
+end

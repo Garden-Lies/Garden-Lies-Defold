@@ -1,0 +1,65 @@
+script: "/src/scripts/gui/reaction.gui_script"
+textures {
+  name: "gui"
+  texture: "/src/ressources_defold/gui.atlas"
+}
+nodes {
+  size {
+    x: 200.0
+    y: 100.0
+  }
+  type: TYPE_BOX
+  id: "racine"
+  inherit_alpha: true
+  size_mode: SIZE_MODE_AUTO
+  visible: false
+}
+nodes {
+  scale {
+    x: 1.3
+    y: 1.3
+  }
+  type: TYPE_BOX
+  texture: "gui/action"
+  id: "action"
+  parent: "racine"
+  layer: "bulles"
+  inherit_alpha: true
+  size_mode: SIZE_MODE_AUTO
+  enabled: false
+}
+nodes {
+  scale {
+    x: 1.3
+    y: 1.3
+  }
+  type: TYPE_BOX
+  texture: "gui/examination"
+  id: "examination"
+  parent: "racine"
+  layer: "bulles"
+  inherit_alpha: true
+  size_mode: SIZE_MODE_AUTO
+  enabled: false
+}
+nodes {
+  scale {
+    x: 1.3
+    y: 1.3
+  }
+  type: TYPE_BOX
+  texture: "gui/parler"
+  id: "parler"
+  parent: "racine"
+  layer: "bulles"
+  inherit_alpha: true
+  size_mode: SIZE_MODE_AUTO
+  enabled: false
+}
+layers {
+  name: "bulles"
+}
+material: "/src/rendering/materials/gui/detached_gui.material"
+adjust_reference: ADJUST_REFERENCE_DISABLED
+max_nodes: 4
+max_dynamic_textures: 0

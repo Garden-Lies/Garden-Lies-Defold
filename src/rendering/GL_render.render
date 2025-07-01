@@ -1,0 +1,13 @@
+script: "/src/rendering/GL_render.render_script"
+render_resources {
+  name: "nss_sprite"
+  path: "/src/rendering/materials/post_process/nss/nearest_supersampling_sprite.material"
+}
+render_resources {
+  name: "nss_gui"
+  path: "/src/rendering/materials/post_process/nss/nearest_supersampling_gui.material"
+}
+render_resources {
+  name: "nss_font"
+  path: "/src/rendering/materials/post_process/nss/nearest_supersampling_font.material"
+}

@@ -1,0 +1,154 @@
+--
+-- deplacement_manuel.script
+-- Garden Lies, 													   15/07/24
+--
+-- Refactor et optimisations le 21/07/24
+-- Ajout des collisions le 25/07/24 - 27/07/24
+-- Simplication et correction des déplacements le 03/08/24
+-- Déplacement du module de collision le 05/08/24
+--
+
+--
+-- Implémentation de la CU no°9 (marcher)
+-- Simule le déplacement d'un joueur dans huit directions,
+-- mais peut aussi appliquer des forces manuellement.
+--
+-- Un système de correction est inclut pour le cas où l'objet est
+-- en contact avec un autre objet bloquant.
+--
+-- Notes : 
+--
+-- * La course relève plutôt du comportement de 
+-- l'entité joueur et se trouve donc dans un autre script.
+--
+-- * La caméra doit connaître la magnitude du déplacement
+-- pour savoir ou se placer.
+-- (Implémentée à l'heure qu'il est.)
+--
+
+local collisions = require "src.modules.physique.collisions"
+local go_utils = require "src.modules.utils.go"
+local msg_utils = require "src.modules.utils.msg"
+
+local vecteur_util = require "src.modules.physique.magnitude"
+local get_nouvelle_position = vecteur_util.get_nouvelle_position
+local MAGNITUDE_X = vecteur_util.MAGNITUDE_X
+local MAGNITUDE_Y = vecteur_util.MAGNITUDE_Y
+
+local round = require "src.modules.utils.math".round
+
+local MSG_APPLIQUER_FORCE = hash("appliquer_force")
+local MSG_RESET_MAGNITUDE = hash("reset_magnitude")
+
+-- Bloc répulsant
+local GROUPE_BLOCK = hash("block")
+
+-- Multiplie la vitesse par le coefficient multiplicateur, si spécifiée.
+go.property("vitesse_coefficient", 1.0)
+
+-- Vitesse de base
+go.property("vitesse", 80.0)
+
+-- Détermine le taux de glissement du joueur.
+go.property("glissement", .07)
+
+-- Active la correction de collisions.
+go.property("collisions", true)
+
+--
+-- Si un objet pousse l'entité, et la direction de celui-ci est
+-- droit devante, alors la propriété s'active.
+--
+go.property("est_bloque_devant", false)
+
+--
+-- Direction finale où se le joueur fait face.
+-- Ne devrait pas être modifié directement.
+--
+-- Parfait pour déterminer la direction du joueur.
+--
+go.property("magnitude", vmath.vector3())
+
+-- Force appliquée à l'instant présent selon une direction.
+go.property("force", vmath.vector3())
+
+-- Cumule une force à la magnitude actuelle.
+local function get_nouvelle_magnitude(self)
+	setv.add(self.magnitude, self.magnitude, self.force)
+end
+
+local function reset_magnitude(self)
+	self.magnitude.x, self.magnitude.y = 0, 0
+end
+
+function init(self)	
+
+	self.url = msg.url()
+	self.objet = msg.url(".")
+
+	self.position = go.get_position()
+end
+
+function update(self, dt)
+
+	local vitesse = self.vitesse * self.vitesse_coefficient
+	self.position.x, self.position.y 
+	= get_nouvelle_position(self.position, self.magnitude, vitesse, dt)
+	
+	--
+	-- FIXME
+	-- Le comportement différents selon les ordinateurs
+	-- dépend du raffraichissement des trames.
+	-- Un raffraichissement de 2ms casse tout !
+	-- Correction : trame fixe réglée par game.project (60, 144, etc.)
+	--
+	self.position.x,
+	self.position.y = round(self.position.x), round(self.position.y)
+	go.animate(self.objet, go_utils.PROP_POSITION, go.PLAYBACK_ONCE_FORWARD,
+			   self.position, go.EASING_LINEAR, self.glissement)
+
+	self.est_bloque_devant = false
+end
+
+function on_input(self, action_id, action)
+
+	-- Détermine la direction dans laquelle se diriger.
+	local mx, my = MAGNITUDE_X[action_id], MAGNITUDE_Y[action_id]
+	self.magnitude.x = mx or self.magnitude.x
+	self.magnitude.y = my or self.magnitude.y
+		
+	if action.released then
+
+		if mx then
+			self.magnitude.x = 0
+		elseif my then
+			self.magnitude.y = 0
+		end
+	end
+end
+
+function on_message(self, message_id, message)
+
+	if message_id == msg_utils.CONTACT_RESPONSE and self.collisions then
+
+		-- Plusieurs comportements peuvent être implémentés ici.
+
+		-- Traitement des collisions
+		if message.other_group == GROUPE_BLOCK then
+
+			local distance, norme = message.distance, message.normal
+			self.position.x, self.position.y 
+			= collisions.resoudre_collisions(self.position, distance, norme)
+			
+			self.est_bloque_devant 
+			= collisions.est_direction_opposee(self.magnitude, norme)
+
+		end
+
+	-- Applique la force sans commandes.
+	elseif message_id == MSG_APPLIQUER_FORCE then
+		get_nouvelle_magnitude(self)
+	elseif message_id == MSG_RESET_MAGNITUDE then
+		reset_magnitude(self)
+	end
+end

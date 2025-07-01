@@ -1,0 +1,11 @@
+{
+    "fr": {
+        "code": "fr", 
+        "nom": "Français"
+    }, 
+    
+    "en": {
+        "code": "en", 
+        "nom": "English"
+    }
+}

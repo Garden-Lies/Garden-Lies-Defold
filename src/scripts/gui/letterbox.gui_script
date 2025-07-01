@@ -1,0 +1,38 @@
+--
+-- letterbox.gui_script
+-- Garden Lies, 													   30/10/24
+--
+
+--
+-- Affiche une letterbox qui permet d'augmenter la concentration.
+--
+
+local MSG_ACTIVER_LETTERBOX = hash("activer_letterbox")
+local MSG_DESACTIVER_LETTERBOX = hash("desactiver_letterbox")
+
+local function activer_letterbox(self)
+
+	local letterbox = self.letterbox
+	gui.set_enabled(letterbox, true)
+	gui.animate(letterbox, gui.PROP_ALPHA, 1, gui.EASING_INCUBIC, .5)
+end
+
+local function desactiver_letterbox(self)
+
+	local letterbox = self.letterbox
+	gui.animate(letterbox, gui.PROP_ALPHA, 0, gui.EASING_INCUBIC, .5, 0,
+				function() gui.set_enabled(letterbox, false) end)
+end
+
+function init(self)
+	self.letterbox = gui.get_node("letterbox")
+end
+
+function on_message(self, message_id, message)
+
+	if message_id == MSG_ACTIVER_LETTERBOX then
+		activer_letterbox(self)
+	elseif message_id == MSG_DESACTIVER_LETTERBOX then
+		desactiver_letterbox(self)
+	end
+end

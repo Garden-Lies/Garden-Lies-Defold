@@ -1,0 +1,163 @@
+name: "test"
+instances {
+  id: "camera"
+  prototype: "/src/camera/camera.go"
+  position {
+    z: 0.2
+  }
+  component_properties {
+    id: "script"
+    properties {
+      id: "objet_suivi"
+      value: "/joueur/joueur"
+      type: PROPERTY_TYPE_URL
+    }
+    properties {
+      id: "vitesse_camera"
+      value: "0.5"
+      type: PROPERTY_TYPE_NUMBER
+    }
+    properties {
+      id: "animations"
+      value: "true"
+      type: PROPERTY_TYPE_BOOLEAN
+    }
+  }
+}
+collection_instances {
+  id: "joueur"
+  collection: "/src/objets/joueur.collection"
+  position {
+    z: 0.1
+  }
+  instance_properties {
+    id: "joueur"
+    properties {
+      id: "deplacement_joueur"
+      properties {
+        id: "vitesse"
+        value: "60.0"
+        type: PROPERTY_TYPE_NUMBER
+      }
+    }
+    properties {
+      id: "joueur"
+      properties {
+        id: "sprint_coefficient"
+        value: "1.75"
+        type: PROPERTY_TYPE_NUMBER
+      }
+    }
+  }
+}
+scale_along_z: 0
+embedded_instances {
+  id: "test"
+  data: "components {\n"
+  "  id: \"test_b\"\n"
+  "  component: \"/main/niveaux/test_b.script\"\n"
+  "}\n"
+  "embedded_components {\n"
+  "  id: \"sprite\"\n"
+  "  type: \"sprite\"\n"
+  "  data: \"default_animation: \\\"defold\\\"\\n"
+  "material: \\\"/builtins/materials/sprite.material\\\"\\n"
+  "textures {\\n"
+  "  sampler: \\\"texture_sampler\\\"\\n"
+  "  texture: \\\"/src/ressources_defold/splashscreen.atlas\\\"\\n"
+  "}\\n"
+  "\"\n"
+  "}\n"
+  "embedded_components {\n"
+  "  id: \"collision\"\n"
+  "  type: \"collisionobject\"\n"
+  "  data: \"type: COLLISION_OBJECT_TYPE_STATIC\\n"
+  "mass: 0.0\\n"
+  "friction: 0.1\\n"
+  "restitution: 0.5\\n"
+  "group: \\\"block\\\"\\n"
+  "mask: \\\"tangible\\\"\\n"
+  "embedded_collision_shape {\\n"
+  "  shapes {\\n"
+  "    shape_type: TYPE_SPHERE\\n"
+  "    position {\\n"
+  "    }\\n"
+  "    rotation {\\n"
+  "    }\\n"
+  "    index: 0\\n"
+  "    count: 1\\n"
+  "  }\\n"
+  "  data: 48.0\\n"
+  "}\\n"
+  "\"\n"
+  "}\n"
+  "embedded_components {\n"
+  "  id: \"reaction\"\n"
+  "  type: \"collisionobject\"\n"
+  "  data: \"type: COLLISION_OBJECT_TYPE_STATIC\\n"
+  "mass: 0.0\\n"
+  "friction: 0.1\\n"
+  "restitution: 0.5\\n"
+  "group: \\\"action\\\"\\n"
+  "mask: \\\"joueur\\\"\\n"
+  "embedded_collision_shape {\\n"
+  "  shapes {\\n"
+  "    shape_type: TYPE_SPHERE\\n"
+  "    position {\\n"
+  "    }\\n"
+  "    rotation {\\n"
+  "    }\\n"
+  "    index: 0\\n"
+  "    count: 1\\n"
+  "    id: \\\"collision\\\"\\n"
+  "  }\\n"
+  "  data: 55.0\\n"
+  "}\\n"
+  "\"\n"
+  "}\n"
+  ""
+  position {
+    x: 151.0
+    y: 9.0
+    z: 0.01
+  }
+}
+embedded_instances {
+  id: "map"
+  data: "components {\n"
+  "  id: \"map\"\n"
+  "  component: \"/src/ressources_defold/debug/map.tilemap\"\n"
+  "}\n"
+  "embedded_components {\n"
+  "  id: \"sprite\"\n"
+  "  type: \"sprite\"\n"
+  "  data: \"default_animation: \\\"TiledMap Editor Example Demo- Ancient Ruins\\\"\\n"
+  "material: \\\"/builtins/materials/sprite.material\\\"\\n"
+  "textures {\\n"
+  "  sampler: \\\"texture_sampler\\\"\\n"
+  "  texture: \\\"/src/ressources_defold/debug/map2.atlas\\\"\\n"
+  "}\\n"
+  "\"\n"
+  "  position {\n"
+  "    x: 1587.0\n"
+  "    y: 893.0\n"
+  "  }\n"
+  "}\n"
+  "embedded_components {\n"
+  "  id: \"collision\"\n"
+  "  type: \"collisionobject\"\n"
+  "  data: \"collision_shape: \\\"/src/ressources_defold/debug/map.tilemap\\\"\\n"
+  "type: COLLISION_OBJECT_TYPE_STATIC\\n"
+  "mass: 0.0\\n"
+  "friction: 0.1\\n"
+  "restitution: 0.5\\n"
+  "group: \\\"block\\\"\\n"
+  "mask: \\\"tangible\\\"\\n"
+  "\"\n"
+  "}\n"
+  ""
+  position {
+    x: -1612.0
+    y: -895.0
+  }
+}

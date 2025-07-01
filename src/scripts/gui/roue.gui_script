@@ -1,0 +1,147 @@
+--
+-- roue.gui_script
+-- Garden Lies, 													   01/08/24
+--
+
+-- 
+-- Gère la logique et les animations de la roue des plantes.
+-- CU no°27 (Ouvrir la roue des plantes)
+--
+-- Le script à un accès direct à l'objet joueur.
+--
+
+-- FIXME memory leak potentiel à chaque exécution.
+
+-- TODO pouvoir accéder à l'inventaire et insérer des images.
+-- TODO appliquer une sélection.
+-- TODO faire en sorte de savoir qu'elle plante est sélectionnée.
+
+local actions = require "src.modules.input.constantes_action_id"
+
+local gui_utils = require "src.modules.utils.gui"
+local msg_utils = require "src.modules.utils.msg"
+
+local MSG_ACTIVER_GUI = hash("activer_roue")
+
+local RACINE = hash("racine")
+local ROUE = hash("roue")
+local ROUE_CENTRE = hash("roue_centre")
+
+local ROUES_DIR = {
+	[actions.HAUT] = hash("roue_haut"),
+	[actions.DROITE] = hash("roue_droite"),
+	[actions.BAS] = hash("roue_bas"),
+	[actions.GAUCHE] = hash("roue_gauche")
+}
+
+local VECTEUR_SCALE_BASE = vmath.vector3(1.0, 1.0, 1.0)
+
+local function changer_etat_roue(self)
+	
+	self.est_actif = not self.est_actif
+	
+	gui.set_enabled(self.noeuds[RACINE], self.est_actif)
+	gui.set_enabled(self.selection, self.est_actif)
+end
+
+local function activer_gui(self, x, y)
+	gui.set(self.noeuds[RACINE], gui_utils.PROP_POSITION_X, x)
+	gui.set(self.noeuds[RACINE], gui_utils.PROP_POSITION_Y, y)
+
+	self.selection = self.noeuds[ROUE_CENTRE]
+	changer_etat_roue(self)
+
+	self.peut_bouger = true
+	
+	msg.post(self.joueur_url, msg_utils.RELEASE_INPUT)
+	msg.post(self.roue_url, msg_utils.ACQUIRE_INPUT)
+
+	gui.set(self.noeuds[ROUE], gui.PROP_SCALE, VECTEUR_SCALE_BASE)
+
+	gui.animate(self.noeuds[ROUE], gui.PROP_SCALE,
+				self.scale_roue, gui.EASING_INCUBIC, .1)
+
+	gui.animate(self.noeuds[RACINE], gui.PROP_ALPHA,
+				1, gui.EASING_LINEAR, .2, 0)
+end
+
+local function desactiver_gui(self)
+	msg.post(self.roue_url, msg_utils.RELEASE_INPUT)
+	
+	gui.animate(self.noeuds[RACINE], gui.PROP_ALPHA,
+				0, gui.EASING_LINEAR, .16, 0,
+
+	-- TODO Peut-être enlevé si on fait une anim de transformation. 
+	-- (QOL) attend un peu avant de relancer les inputs utilisateurs.
+	function()
+		changer_etat_roue(self)
+		msg.post(self.joueur_url, msg_utils.ACQUIRE_INPUT)
+	end)
+end
+
+--
+-- Remplace l'ancienne sélection par la nouvelle,
+-- indiquée par la direction.
+-- 
+-- Lâcher une direction revient au centre de la sélection.
+--
+local function nouvelle_selection(self, action_id, action)
+
+	-- Permet de limiter à une fois par direction.
+	if self.peut_bouger then
+	
+		gui.set_enabled(self.selection, false)
+
+		self.selection = self.noeuds[ROUES_DIR[action_id]]
+		gui.set_enabled(self.selection, true)
+
+		self.peut_bouger = false
+
+	end
+
+	-- Reset la position si possible.
+	if action.released then
+
+		gui.set_enabled(self.selection, false)
+		gui.set_enabled(self.noeuds[ROUE_CENTRE], true)
+		self.selection = self.noeuds[ROUE_CENTRE]
+
+		self.peut_bouger = true
+		
+	end
+end
+
+function init(self)
+
+	self.roue_url = msg.url()
+	self.joueur_url = msg.url("/joueur/joueur")
+	
+	local racine = gui.get_node(RACINE)
+	self.noeuds = gui.get_tree(racine)
+
+	self.scale_roue = gui.get(self.noeuds[ROUE], gui.PROP_SCALE)
+
+	self.est_actif = false
+
+	gui.set_enabled(self.noeuds[ROUE_CENTRE], true)
+end
+
+function on_input(self, action_id, action)
+	
+	-- Valide la sélection.
+	-- TODO Enregistre la plante sélectionnée.
+	if action_id == actions.ROUE and action.released then
+		desactiver_gui(self)
+
+	elseif actions.est_mouvement(action_id) then
+		nouvelle_selection(self, action_id, action)
+	end
+end
+
+function on_message(self, message_id, message)
+
+	if message_id == MSG_ACTIVER_GUI then
+		activer_gui(self, message.x, message.y)
+	end
+
+end

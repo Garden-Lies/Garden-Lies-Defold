@@ -1,0 +1,96 @@
+animations {
+  id: "normal_d_neutral"
+  images {
+    image: "/assets/images/npc/midori/neutral1.png"
+  }
+  playback: PLAYBACK_LOOP_FORWARD
+  fps: 0
+}
+animations {
+  id: "normal_u_neutral"
+  images {
+    image: "/assets/images/npc/midori/neutral2.png"
+  }
+  playback: PLAYBACK_LOOP_FORWARD
+  fps: 0
+}
+animations {
+  id: "normal_r_neutral"
+  images {
+    image: "/assets/images/npc/midori/neutral4.png"
+  }
+  playback: PLAYBACK_LOOP_FORWARD
+  fps: 0
+}
+animations {
+  id: "normal_l_neutral"
+  images {
+    image: "/assets/images/npc/midori/neutral3.png"
+  }
+  playback: PLAYBACK_LOOP_FORWARD
+  fps: 0
+}
+animations {
+  id: "normal_d_move"
+  images {
+    image: "/assets/images/npc/midori/neutral1.png"
+  }
+  playback: PLAYBACK_LOOP_FORWARD
+  fps: 0
+}
+animations {
+  id: "normal_u_move"
+  images {
+    image: "/assets/images/npc/midori/neutral2.png"
+  }
+  playback: PLAYBACK_LOOP_FORWARD
+  fps: 0
+}
+animations {
+  id: "normal_r_move"
+  images {
+    image: "/assets/images/npc/midori/neutral4.png"
+  }
+  playback: PLAYBACK_LOOP_FORWARD
+  fps: 0
+}
+animations {
+  id: "normal_l_move"
+  images {
+    image: "/assets/images/npc/midori/neutral3.png"
+  }
+  playback: PLAYBACK_LOOP_FORWARD
+  fps: 0
+}
+animations {
+  id: "normal_d_run"
+  images {
+    image: "/assets/images/npc/midori/neutral1.png"
+  }
+  playback: PLAYBACK_LOOP_FORWARD
+  fps: 0
+}
+animations {
+  id: "normal_u_run"
+  images {
+    image: "/assets/images/npc/midori/neutral2.png"
+  }
+  playback: PLAYBACK_LOOP_FORWARD
+  fps: 0
+}
+animations {
+  id: "normal_r_run"
+  images {
+    image: "/assets/images/npc/midori/neutral4.png"
+  }
+  playback: PLAYBACK_LOOP_FORWARD
+  fps: 0
+}
+animations {
+  id: "normal_l_run"
+  images {
+    image: "/assets/images/npc/midori/neutral3.png"
+  }
+  playback: PLAYBACK_LOOP_FORWARD
+  fps: 0
+}

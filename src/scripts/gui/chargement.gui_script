@@ -1,0 +1,59 @@
+--
+-- chargement.gui_script
+-- Garden Lies, 													   05/08/24
+--
+
+--
+-- Gère l'écran de chargement de Garden Lies.
+--
+-- Le composant est fait pour être chargé
+-- à l'aide d'une collection factory !
+--
+
+local gui_utils = require "src.modules.utils.gui"
+
+local MSG_ACTIVER_ECRAN = hash("activer_ecran")
+local MSG_DESACTIVER_ECRAN = hash("desactiver_ecran")
+
+local MSG_CHRG_ANIM_T = hash("animation_chargement_fini")
+
+local RACINE = hash("racine")
+
+local function activer_ecran(self)
+	
+	gui.set_alpha(self.racine, 0)
+	gui.animate(self.racine, gui_utils.PROP_ALPHA, 1, gui.EASING_OUTEXPO, 3, 0,
+				function() sys.set_update_frequency(30) end)
+	
+	gui.set_enabled(self.racine, true)
+end
+
+--
+-- Le script qui utilise le l'écran de chargement
+-- est informé de l'animation de fin.
+--
+local function desactiver_ecran(self, sender)
+
+	sys.set_update_frequency(0)
+	
+	gui.set_alpha(self.racine, 1)
+	gui.animate(self.racine, gui_utils.PROP_ALPHA, 0, gui.EASING_OUTEXPO, 2, 0,
+				function() 
+					gui.set_enabled(self.racine, false) 
+					msg.post(sender, MSG_CHRG_ANIM_T)
+				end)
+end
+
+function init(self)	
+	self.racine = gui.get_node(RACINE)
+	self.noeuds = gui.get_tree(self.racine)
+end
+
+function on_message(self, message_id, message, sender)
+
+	if message_id == MSG_ACTIVER_ECRAN then
+		activer_ecran(self)
+	elseif message_id == MSG_DESACTIVER_ECRAN then
+		desactiver_ecran(self, sender)
+	end
+end

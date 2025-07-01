@@ -1,0 +1,17 @@
+function init()
+	msg.post("/joueur/joueur", "acquire_input_focus")
+end
+
+function update()
+
+	-- Pas de magnitude lorsqu'on détache la caméra.
+	if go.get("/camera#script", "objet_suivi") ~= msg.url("/camera") then
+
+		local magnitude = go.get("/joueur/joueur#deplacement_joueur", "magnitude")
+		local coeff = go.get("/joueur/joueur#deplacement_joueur", "vitesse_coefficient") * .8
+		--if magnitude.x ~= 0 or magnitude.y ~= 0 then
+			go.set("/camera#script", "magnitude", magnitude)
+			go.set("/camera#script", "vitesse_camera", coeff)
+		--end
+	end
+end

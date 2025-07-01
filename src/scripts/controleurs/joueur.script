@@ -1,0 +1,341 @@
+--
+-- joueur.script
+-- Garden Lies, 													   22/07/24
+--
+-- Refactor le 21/07/24
+-- Modifications d'éléments clés le 26/07/24 - 27/07/24
+-- Animations plus avancées le 28/07/24 - 29/07/24 (régression le 12/08/24)
+-- Appel de la roue et de la réaction le 03/08/24 - 06/08/24
+--
+
+--
+-- Contrôleur du joueur, ajoute quelques fonctionnalités.
+--
+-- Complète pour le moment la CU no°10 (courir)
+-- Accompli le comportement d'un joueur en jeu.
+--
+
+local actions = require "src.modules.input.constantes_action_id" 
+
+local est_direction_opposee 
+= require "src.modules.physique.collisions".est_direction_opposee
+local est_direction_opposee_approximation
+= require "src.modules.physique.collisions".est_direction_opposee_approximation
+
+local est_vecteur_nul = require "src.modules.physique.magnitude".est_vecteur_nul
+
+local concat = table.concat
+
+-- Message de déplacement
+local MSG_RESET_MAGNITUDE = hash("reset_magnitude")
+
+-- Message de la roue
+local MSG_ACTIVER_ROUE = hash("activer_roue")
+
+local MSG_UPDATE_POSITION_REACTION = hash("update_position")
+local MSG_SET_REACTION = hash("set_reaction")
+local MSG_ACTIVER_REACTION = hash("activer_reaction")
+local MSG_DESACTIVER_REACTION = hash("desactiver_reaction")
+
+-- Messages de réaction
+
+local CURSEUR = hash("cursor")
+
+local ACTION_MOUVEMENT = "move"
+local ACTION_NEUTRAL = "neutral"
+local ACTION_SPRINT = "run"
+
+local REACTIONS = {
+	[hash("action")] = true,
+	[hash("examination")] = true,
+	[hash("parler")] = true
+}
+
+--
+-- Basé sur les codes des atlas :
+-- * _u_ = up
+-- * _r_ = right
+-- * _d_ = down
+-- * _u_ = left
+--
+local DIRECTIONS_ANIMATION = {
+	[actions.HAUT] = "_u_",
+	[actions.DROITE] = "_r_",
+	[actions.BAS] = "_d_",
+	[actions.GAUCHE] = "_l_",
+}
+
+local PP_BLOQUE = hash("est_bloque_devant")
+local PP_MAGNITUDE = hash("magnitude")
+local PP_DEP_VIT_COEFF = hash("vitesse_coefficient")
+
+--
+-- FIXME
+-- Placer le type en tant que propriété Defold.
+-- https://github.com/defold/defold/issues/8420
+--
+-- TODO
+-- Changer l'animation lorsque Midori se transforme.
+--
+local ANIMATION = "normal"
+
+go.property("sprint_autorise", true)
+go.property("sprint_coefficient", 1.2)
+
+--
+-- La roue et les bulles de réaction, étant des gui détachés,
+-- il faut savoir où les placer sans prendre compte du sprite lui-même.
+--
+go.property("bulle_eloignement", -5)
+go.property("bulle_elevation", 10)
+go.property("roue_elevation", 50)
+
+-- À quel point le repérage d'actions est stricte.
+go.property("reperage_action_plage", 1.5)
+
+-- ================== fonctions locales ==================
+
+-- TODO séparer les animations dans un autre module.
+
+--
+-- Malheureusement, il n'est pas possible de concaténer des signatures.
+-- Les performances ne sont peut-être pas au rendez-vous.
+--
+local function creer_animation_mouvement(self, action_id)
+
+	self.concat[2] = DIRECTIONS_ANIMATION[action_id]
+	if self.concat[2] then
+
+		-- Détermine le stade du sprite
+		if self.en_sprint then
+			self.concat[3] = ACTION_SPRINT
+		elseif self.en_mouvement then
+			self.concat[3] = ACTION_MOUVEMENT
+		else
+			self.concat[3] = ACTION_NEUTRAL
+		end
+		
+		--
+		-- Exemple d'animation après concaténation :
+		-- normal_d_neutral
+		--
+		return hash(concat(self.concat))
+	end
+
+	-- Sinon, on conserve l'animation d'origine.
+	return self.animation
+end
+
+local function nouvelle_animation_mouvement(self, action_id)
+
+	-- Animation finale du mouvement
+	self.animation = creer_animation_mouvement(self, action_id)
+
+	if self.animation ~= self.animation_jouee then
+
+		self.animation_jouee = self.animation
+
+		local curseur = go.get(self.url_sprite, CURSEUR)
+		sprite.play_flipbook(self.url_sprite, self.animation,
+							function() end, {offset = curseur})
+	end
+end
+
+local function reset_vitesse(self)
+
+	go.cancel_animations(self.url_dpj, PP_DEP_VIT_COEFF)
+	go.set(self.url_dpj, PP_DEP_VIT_COEFF, 1)
+	
+	self.en_sprint = false
+end
+
+local function traiter_marche(self)
+	
+	--
+	-- Le joueur peut avoir deux masques de collisions :
+	-- * un en vertical (collision_v)
+	-- * un en horizontal (collision_h)
+	--
+	-- Un des masques se désactive selon la direction du joueur.
+	--
+	if self.magnitude.x == 0 and (self.magnitude.y == -1 
+							   or self.magnitude.y == 1) then
+
+		-- Si la direction pointe vers le haut ou le bas.
+		msg.post(self.url_collision_v, msg.ENABLE)
+		msg.post(self.url_collision_h, msg.DISABLE)
+	else
+		msg.post(self.url_collision_v, msg.DISABLE)
+		msg.post(self.url_collision_h, msg.ENABLE)
+	end
+end
+
+local function traiter_sprint(self, action)
+
+	self.en_sprint = true
+	
+	-- Augmente progressivement la vitesse du joueur.
+	go.set(self.url_dpj, PP_DEP_VIT_COEFF, self.sprint_coefficient)
+
+	if action.released then
+		reset_vitesse(self)
+	end
+end
+
+--
+-- Pour faire des animations plus raffiner,
+-- il faut appliquer la physique Newtonienne de Defold !
+--
+local function gerer_input_mouvement(self, action_id, action)
+
+	--
+	-- On veut vérifier que le personnage ne soit pas en mouvement,
+	-- mais aussi s'il se bloque à cause d'un quelconque objet.
+	--
+	self.en_mouvement = not est_vecteur_nul(self.magnitude) 
+							and not go.get(self.url_dpj, PP_BLOQUE)
+							
+	if self.en_mouvement then
+
+		--
+		-- Sauvegarder la magnitude précédente 
+		-- peut nous servir dans divers calculs,
+		-- notamment avec celui de l'affichage de la bulle de réaction.
+		--
+		self.magnitude_pred = self.magnitude
+		
+		--
+		-- Le joueur ne peut pas sprinter 
+		-- s'il ne bouge pas dans un premier temps.
+		--
+		if action_id == actions.SPRINT and self.sprint_autorise then
+			traiter_sprint(self, action)
+
+		--
+		-- Règle un problème où le sprint ne s'arrête pas
+		-- après ouverture de la roue.
+		--
+		else
+			traiter_marche(self)	
+		end
+
+		nouvelle_animation_mouvement(self, action_id)
+	else
+		
+		-- Le joueur ne bouge plus et perd donc sa vitesse.
+		reset_vitesse(self)
+		nouvelle_animation_mouvement(self, action_id)
+	end
+end
+
+local function gerer_input_roue(self, action_id, action)
+
+	-- TODO mettre en pause le jeu.
+	if action_id == actions.ROUE and action.pressed then
+
+		msg.post(self.url_roue, MSG_ACTIVER_ROUE,
+			{x = self.position.x,
+			y = self.position.y + self.taille_sprite.y + self.roue_elevation})
+		
+		msg.post(self.url_dpj, MSG_RESET_MAGNITUDE)
+	end
+end
+
+local function gerer_reaction(self, message)
+
+	--
+	-- On vérifie si le joueur regarde approximativement
+	-- dans la direction de l'objet.
+	--
+	if est_direction_opposee_approximation(
+		self.magnitude, message.normal, self.reperage_action_plage)
+			or est_direction_opposee(
+				self.magnitude_pred, message.normal) then
+
+		--
+		-- Le joueur peut éventuellement bouger,
+		-- donc on met à jour la position de la bulle à chaque frame.
+		--
+		msg.post(self.url_reaction, MSG_UPDATE_POSITION_REACTION,
+			{x = self.position.x + self.taille_sprite.x + self.bulle_elevation,
+			 y = self.position.y + self.taille_sprite.y 
+			   + self.bulle_eloignement})
+
+		if not self.action_possible then
+			msg.post(self.url_reaction, MSG_SET_REACTION,
+					{reaction = message.other_group})
+			msg.post(self.url_reaction, MSG_ACTIVER_REACTION)
+
+			self.action_possible = true
+		end
+
+	else
+		msg.post(self.url_reaction, MSG_DESACTIVER_REACTION)
+		self.action_possible = false
+	end
+end
+
+local function update_donnees(self)
+	self.magnitude = go.get(self.url_dpj, PP_MAGNITUDE)
+	setv.get_position(self.position, self.url_objet)
+end
+
+-- ================== fonctions principales ==================
+
+function init(self)
+	
+	-- Les collisions à modifier.
+	self.url_collision_h = msg.url("#collision_h")
+	self.url_collision_v = msg.url("#collision_v")
+
+	-- Scripts annexes
+	self.url_dpj = msg.url("#deplacement_joueur")
+	self.url_script = msg.url()
+
+	-- Objets liés au joueur.
+	self.url_objet = msg.url(".")
+	self.url_roue = msg.url("/joueur/roue")
+	self.url_reaction = msg.url("/joueur/reaction")
+	self.url_sprite = msg.url("#sprite")
+
+	self.magnitude = go.get(self.url_dpj, PP_MAGNITUDE)
+	self.position = go.get_position(self.url_objet)
+	self.taille_sprite = go.get(self.url_sprite, "size")
+
+	-- Représente l'état du joueur.
+	self.en_mouvement = false
+	self.en_sprint = false
+	self.action_possible = false
+
+	-- Active l'optimisation pour les concaténations.
+	self.concat = {}
+	self.concat[1] = ANIMATION
+end
+
+-- TODO carte, transformation, etc.
+function on_input(self, action_id, action)
+
+	--
+	-- Met à jour certaines données d'instanciation
+	-- afin de pouvoir effectuer les prochains calculs.
+	--
+	update_donnees(self)
+	
+	--
+	-- Traîte l'intégralité des mouvements (animation & sprint.)
+	-- Voir #deplacement_joueur pour les mouvements de base.
+	--
+	gerer_input_mouvement(self, action_id, action)
+
+	-- Gère l'ouverture et l'affichage de la roue des plantes.
+	gerer_input_roue(self, action_id, action)
+end
+
+function on_message(self, message_id, message)
+
+	-- Fait apparaître les bulles de réaction.
+	if message_id == msg.CONTACT_RESPONSE 
+		and REACTIONS[message.other_group] then
+		gerer_reaction(self, message)
+	end
+end

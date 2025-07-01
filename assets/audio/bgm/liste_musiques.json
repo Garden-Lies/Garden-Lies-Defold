@@ -1,0 +1,13 @@
+{
+    "000": {
+        "nomFichier": "intro.ogg", 
+        "nomEntier": "Intro", 
+        "description": "Musique au lancement du jeu"
+    }, 
+    
+    "001": {
+        "nomFichier": "brise.ogg", 
+        "nomEntier": "Brise", 
+        "description": "Une brise vous carresse la joue..."
+    }
+}
