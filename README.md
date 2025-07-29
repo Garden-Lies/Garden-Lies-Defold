@@ -13,15 +13,11 @@ Langages de programmation :
 
 Pour plus d'informations, contactez noixdexydre@mailfence.com
 
-## **Avertissements**
-
-Le jeu est appartenu par **NoixDeXydre** et est donc protégé par des droits d'auteur. Il est interdit de copier, partager ou modifier le code source sans l'autorisation de celui-ci.
-
-Les parties du code qui sont libre de droit seront partagés dans un autre dépôt.
-
 ---
 
 ## **Dépendances**
+
+Certaines parties du code pourraient être cassés à l'heure actuelle.
 
 Le projet est compatible avec **Defold >= 1.9.5** depuis _79f6090_.
 Les versions antérieurs ne pourraient pas être supportées.
